@@ -1,10 +1,11 @@
 /*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
+Copyright © 2021 luckyhappycat HERE <EMAIL ADDRESS>
 
 */
 package cmd
 
 import (
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -14,7 +15,7 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "vscode-configer",
+	Use:   "vscode",
 	Short: "A brief description of your application",
 	Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:
@@ -45,6 +46,7 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
+	log.Print("root.init()")
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
