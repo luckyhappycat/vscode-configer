@@ -13,6 +13,7 @@
 main
 vscode
 vscode-configer
+.DS_Store
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
