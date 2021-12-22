@@ -5,11 +5,14 @@ Copyright © 2021 luckyhappycat Beijing China <luckyhappycat@126.com>
 package cpp
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"path"
 
+	"github.com/luckyhappycat/vscode-configer/pkg/common"
 	"github.com/pkg/errors"
 )
 
@@ -39,6 +42,69 @@ func (c *cpp) Create() error {
 
 func (c *cpp) createCCppProperties() error {
 	log.Print("pkg/cpp/cpp.createCCppProperties()")
+	paths := []string{"${workspaceFolder}/**"}
+	includePath := "/usr/include"
+	if common.IsDir(includePath) {
+		paths = append(paths, includePath)
+	}
+	includePath = "/usr/local/include"
+	if common.IsDir(includePath) {
+		paths = append(paths, includePath)
+	}
+	versions, err := common.GetDirs("/usr/lib/gcc/x86_64-redhat-linux/")
+	if err == nil {
+		if len(versions) != 0 {
+			includePath = fmt.Sprintf("/usr/lib/gcc/x86_64-redhat-linux/%s/include", versions[len(versions)])
+			if common.IsDir(includePath) {
+				paths = append(paths, includePath)
+			}
+		}
+	}
+	versions, err = common.GetDirs("/usr/include/c++/")
+	if err == nil {
+		if len(versions) != 0 {
+			includePath = fmt.Sprintf("/usr/include/c++/%s/", versions[len(versions)])
+			if common.IsDir(includePath) {
+				paths = append(paths, includePath)
+			}
+			includePath = fmt.Sprintf("/usr/include/c++/%s/backward", versions[len(versions)])
+			if common.IsDir(includePath) {
+				paths = append(paths, includePath)
+			}
+			includePath = fmt.Sprintf("/usr/include/c++/%s/x86_64-redhat-linux", versions[len(versions)])
+			if common.IsDir(includePath) {
+				paths = append(paths, includePath)
+			}
+		}
+	}
+	ccpp := CCppProperties{
+		Configurations: []CCppPropertiesConfiguration{
+			{
+				Name:             "Linux",
+				IncludePath:      paths,
+				Defines:          []string{},
+				CompilerPath:     "/usr/bin/gcc",
+				CStandard:        "c11",
+				CppStandard:      "c++11",
+				IntelliSenseMode: "gcc-x64",
+			},
+		},
+		Version: 4,
+	}
+	indentCcpp, err := json.MarshalIndent(ccpp, "", "    ")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	err = os.MkdirAll(path.Dir("./.vscode/c_cpp_properties.json"), os.ModePerm)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	f, err := os.Create("./.vscode/c_cpp_properties.json")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	defer f.Close()
+	f.Write(indentCcpp)
 	// 搜索指定路径，保存路径列表
 	// 指定默认参数
 	// 生成json文件
@@ -260,6 +326,7 @@ func (c *cpp) createTasks() error {
 	if err != nil {
 		return errors.WithStack(err)
 	}
+	indentTasks = bytes.Replace(indentTasks, []byte("\\u0026"), []byte("&"), -1)
 	err = os.MkdirAll(path.Dir("./.vscode/tasks.json"), os.ModePerm)
 	if err != nil {
 		return errors.WithStack(err)

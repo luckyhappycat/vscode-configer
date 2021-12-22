@@ -1,5 +1,21 @@
 package cpp
 
+// c_cpp_properties.json
+type CCppProperties struct {
+	Configurations []CCppPropertiesConfiguration `json:"configurations"`
+	Version        int                           `json:"version"`
+}
+
+type CCppPropertiesConfiguration struct {
+	Name             string   `json:"name"`
+	IncludePath      []string `json:"includePath"`
+	Defines          []string `json:"defines"`
+	CompilerPath     string   `json:"compilerPath"`
+	CStandard        string   `json:"cStandard"`
+	CppStandard      string   `json:"cppStandard"`
+	IntelliSenseMode string   `json:"intelliSenseMode"`
+}
+
 // launch.json
 type Launch struct {
 	Version        string          `json:"version"`
