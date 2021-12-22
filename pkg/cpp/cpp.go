@@ -5,8 +5,12 @@ Copyright © 2021 luckyhappycat Beijing China <luckyhappycat@126.com>
 package cpp
 
 import (
-	"github.com/pkg/errors"
+	"encoding/json"
 	"log"
+	"os"
+	"path"
+
+	"github.com/pkg/errors"
 )
 
 func NewCpp() *cpp {
@@ -35,20 +39,236 @@ func (c *cpp) Create() error {
 
 func (c *cpp) createCCppProperties() error {
 	log.Print("pkg/cpp/cpp.createCCppProperties()")
+	// 搜索指定路径，保存路径列表
+	// 指定默认参数
+	// 生成json文件
 	return nil
 }
 
 func (c *cpp) createLaunch() error {
 	log.Print("pkg/cpp/cpp.createLaunch()")
+	cfg := Configuration{
+		Name:            "g++调试",
+		Type:            "cppdbg",
+		Request:         "launch",
+		Program:         "${fileDirname}/${fileBasenameNoExtension}",
+		Args:            []string{},
+		StopAtEntry:     false,
+		Cwd:             "${workspaceFolder}",
+		Environment:     []string{},
+		ExternalConsole: false,
+		MIMode:          "gdb",
+		PreLaunchTask:   "C/C++: g++ build",
+		PostDebugTask:   "C/C++: g++ clean",
+	}
+	launch := Launch{
+		Version:        "0.2.0",
+		Configurations: []Configuration{cfg},
+	}
+	indentLaunch, err := json.MarshalIndent(launch, "", "    ")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	err = os.MkdirAll(path.Dir("./.vscode/launch.json"), os.ModePerm)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	f, err := os.Create("./.vscode/launch.json")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	defer f.Close()
+	f.Write(indentLaunch)
+
 	return nil
 }
 
 func (c *cpp) createSettings() error {
 	log.Print("pkg/cpp/cpp.createSettings()")
+	fileAssociations := FilesAssociations{
+		Tcc:             "cpp",
+		Streambuf:       "cpp",
+		String:          "cpp",
+		Array:           "cpp",
+		Cctype:          "cpp",
+		Clocale:         "cpp",
+		Cmath:           "cpp",
+		Cstdarg:         "cpp",
+		Cstdint:         "cpp",
+		Cstdio:          "cpp",
+		Cstdlib:         "cpp",
+		Cstring:         "cpp",
+		Ctime:           "cpp",
+		Cwchar:          "cpp",
+		Deque:           "cpp",
+		List:            "cpp",
+		UnorderedMap:    "cpp",
+		Vector:          "cpp",
+		Exception:       "cpp",
+		Fstream:         "cpp",
+		Functional:      "cpp",
+		InitializerList: "cpp",
+		Iosfwd:          "cpp",
+		Iostream:        "cpp",
+		Istream:         "cpp",
+		Limits:          "cpp",
+		New:             "cpp",
+		Ostream:         "cpp",
+		Numeric:         "cpp",
+		Sstream:         "cpp",
+		Stdexcept:       "cpp",
+		Cinttypes:       "cpp",
+		Tuple:           "cpp",
+		TypeTraits:      "cpp",
+		Utility:         "cpp",
+		Typeinfo:        "cpp",
+	}
+	settings := Settings{
+		CmakeConfigureOnOpen:        false,
+		FilesAssociations:           fileAssociations,
+		CCppClangFormatSortIncludes: false,
+	}
+	indentSettings, err := json.MarshalIndent(settings, "", "    ")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	err = os.MkdirAll(path.Dir("./.vscode/settings.json"), os.ModePerm)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	f, err := os.Create("./.vscode/settings.json")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	defer f.Close()
+	f.Write(indentSettings)
 	return nil
 }
 
 func (c *cpp) createTasks() error {
 	log.Print("pkg/cpp/cpp.createTasks()")
+	gppBuild := Task{
+		Type:    "shell",
+		Label:   "C/C++: g++ build",
+		Command: "/usr/bin/g++",
+		Args: []string{"-std=c++11",
+			"-g",
+			"${file}",
+			"-o",
+			"${fileDirname}/${fileBasenameNoExtension}",
+			"&&",
+			"clear",
+			"&&",
+			"${fileDirname}/${fileBasenameNoExtension}",
+		},
+		Options: Options{
+			Cwd: "${workspaceFolder}",
+		},
+		ProblemMatcher: []string{"$gcc"},
+		Group: Group{
+			Kind:      "build",
+			IsDefault: true,
+		},
+		Presentation: Presentation{
+			Echo:             false,
+			Reveal:           "always",
+			Focus:            false,
+			Panel:            "shared",
+			Clear:            true,
+			ShowReuseMessage: false,
+		},
+	}
+
+	gppClean := Task{
+		Type:    "shell",
+		Label:   "C/C++: g++ clean",
+		Command: "rm",
+		Args: []string{"-rf",
+			"${fileDirname}/${fileBasenameNoExtension}.dSYM",
+			"&&",
+			"rm",
+			"-rf",
+			"${fileDirname}/${fileBasenameNoExtension}",
+		},
+		Options: Options{
+			Cwd: "${workspaceFolder}",
+		},
+		Group: Group{
+			Kind:      "build",
+			IsDefault: true,
+		},
+		Presentation: Presentation{
+			Echo:             false,
+			Reveal:           "always",
+			Focus:            false,
+			Panel:            "shared",
+			ShowReuseMessage: false,
+		},
+	}
+
+	cmakeBuild := Task{
+		Type:    "shell",
+		Label:   "C/C++: cmake build",
+		Command: "cd ./build; cmake ..; make; ",
+		Options: Options{
+			Cwd: "${workspaceFolder}",
+		},
+		Group: Group{
+			Kind:      "build",
+			IsDefault: true,
+		},
+		Presentation: Presentation{
+			Echo:             false,
+			Reveal:           "always",
+			Focus:            false,
+			Panel:            "shared",
+			ShowReuseMessage: false,
+		},
+	}
+
+	cmakeClean := Task{
+		Type:    "shell",
+		Label:   "C/C++: cmake clean",
+		Command: "${fileDirname}/bin/${fileBasenameNoExtension}",
+		Args: []string{
+			"&&",
+			"rm",
+			"-rf",
+			"./build/*",
+		},
+		Options: Options{
+			Cwd: "${workspaceFolder}",
+		},
+		Group: Group{
+			Kind:      "build",
+			IsDefault: true,
+		},
+		Presentation: Presentation{
+			Echo:             false,
+			Reveal:           "always",
+			Focus:            false,
+			Panel:            "shared",
+			ShowReuseMessage: false,
+		},
+	}
+
+	tasks := Tasks{
+		Tasks:   []Task{gppBuild, gppClean, cmakeBuild, cmakeClean},
+		Version: "2.0.0",
+	}
+	indentTasks, err := json.MarshalIndent(tasks, "", "    ")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	err = os.MkdirAll(path.Dir("./.vscode/tasks.json"), os.ModePerm)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	f, err := os.Create("./.vscode/tasks.json")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	defer f.Close()
+	f.Write(indentTasks)
 	return nil
 }
