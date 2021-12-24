@@ -51,27 +51,35 @@ func (c *cpp) createCCppProperties() error {
 	if common.IsDir(includePath) {
 		paths = append(paths, includePath)
 	}
+	log.Print("/usr/lib/gcc/x86_64-redhat-linux/\n")
 	versions, err := common.GetDirs("/usr/lib/gcc/x86_64-redhat-linux/")
+	if err != nil {
+		log.Print(err.Error())
+	}
+	fmt.Println(versions)
 	if err == nil {
 		if len(versions) != 0 {
-			includePath = fmt.Sprintf("/usr/lib/gcc/x86_64-redhat-linux/%s/include", versions[len(versions)])
+			includePath = fmt.Sprintf("/usr/lib/gcc/x86_64-redhat-linux/%s/include", versions[len(versions)-1])
 			if common.IsDir(includePath) {
 				paths = append(paths, includePath)
+			} else {
+				log.Printf("%s is not dir\n", includePath)
 			}
 		}
 	}
+	log.Print("/usr/include/c++/")
 	versions, err = common.GetDirs("/usr/include/c++/")
 	if err == nil {
 		if len(versions) != 0 {
-			includePath = fmt.Sprintf("/usr/include/c++/%s/", versions[len(versions)])
+			includePath = fmt.Sprintf("/usr/include/c++/%s/", versions[len(versions)-1])
 			if common.IsDir(includePath) {
 				paths = append(paths, includePath)
 			}
-			includePath = fmt.Sprintf("/usr/include/c++/%s/backward", versions[len(versions)])
+			includePath = fmt.Sprintf("/usr/include/c++/%s/backward", versions[len(versions)-1])
 			if common.IsDir(includePath) {
 				paths = append(paths, includePath)
 			}
-			includePath = fmt.Sprintf("/usr/include/c++/%s/x86_64-redhat-linux", versions[len(versions)])
+			includePath = fmt.Sprintf("/usr/include/c++/%s/x86_64-redhat-linux", versions[len(versions)-1])
 			if common.IsDir(includePath) {
 				paths = append(paths, includePath)
 			}
@@ -105,9 +113,6 @@ func (c *cpp) createCCppProperties() error {
 	}
 	defer f.Close()
 	f.Write(indentCcpp)
-	// 搜索指定路径，保存路径列表
-	// 指定默认参数
-	// 生成json文件
 	return nil
 }
 
