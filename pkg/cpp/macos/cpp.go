@@ -17,14 +17,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-func NewLinux() *linux {
-	return &linux{}
+func NewMacOS() *mac {
+	return &mac{}
 }
 
-type linux struct {
+type mac struct {
 }
 
-func (c *linux) Create() error {
+func (c *mac) Create() error {
 	log.Print("pkg/cpp/cpp.create()")
 	if err := c.createCCppProperties(); err != nil {
 		return errors.WithStack(err)
@@ -41,7 +41,7 @@ func (c *linux) Create() error {
 	return nil
 }
 
-func (c *linux) createCCppProperties() error {
+func (c *mac) createCCppProperties() error {
 	log.Print("pkg/cpp/cpp.createCCppProperties()")
 	paths := []string{"${workspaceFolder}/**"}
 	includePath := "/usr/include"
@@ -52,15 +52,27 @@ func (c *linux) createCCppProperties() error {
 	if common.IsDir(includePath) {
 		paths = append(paths, includePath)
 	}
-	log.Print("/usr/lib/gcc/x86_64-redhat-linux/\n")
-	versions, err := common.GetDirs("/usr/lib/gcc/x86_64-redhat-linux/")
+	includePath = "/Library/Developer/CommandLineTools/usr/include/"
+	if common.IsDir(includePath) {
+		paths = append(paths, includePath)
+	}
+	includePath = "/Library/Developer/CommandLineTools/usr/include/c++/v1"
+	if common.IsDir(includePath) {
+		paths = append(paths, includePath)
+	}
+	includePath = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
+	if common.IsDir(includePath) {
+		paths = append(paths, includePath)
+	}
+	log.Print("/Library/Developer/CommandLineTools/usr/lib/clang/n")
+	versions, err := common.GetDirs("/Library/Developer/CommandLineTools/usr/lib/clang/")
 	if err != nil {
 		log.Print(err.Error())
 	}
 	fmt.Println(versions)
 	if err == nil {
 		if len(versions) != 0 {
-			includePath = fmt.Sprintf("/usr/lib/gcc/x86_64-redhat-linux/%s/include", versions[len(versions)-1])
+			includePath = fmt.Sprintf("/Library/Developer/CommandLineTools/usr/lib/clang/%s/include", versions[len(versions)-1])
 			if common.IsDir(includePath) {
 				paths = append(paths, includePath)
 			} else {
@@ -117,7 +129,7 @@ func (c *linux) createCCppProperties() error {
 	return nil
 }
 
-func (c *linux) createLaunch() error {
+func (c *mac) createLaunch() error {
 	log.Print("pkg/cpp/cpp.createLaunch()")
 	cfg := cpp.Configuration{
 		Name:            "g++调试",
@@ -155,7 +167,7 @@ func (c *linux) createLaunch() error {
 	return nil
 }
 
-func (c *linux) createSettings() error {
+func (c *mac) createSettings() error {
 	log.Print("pkg/cpp/cpp.createSettings()")
 	fileAssociations := cpp.FilesAssociations{
 		Tcc:             "cpp",
@@ -217,7 +229,7 @@ func (c *linux) createSettings() error {
 	return nil
 }
 
-func (c *linux) createTasks() error {
+func (c *mac) createTasks() error {
 	log.Print("pkg/cpp/cpp.createTasks()")
 	gppBuild := cpp.Task{
 		Type:    "shell",
