@@ -6,8 +6,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/luckyhappycat/vscode-configer/pkg/cpp"
 	"log"
+
+	"github.com/luckyhappycat/vscode-configer/pkg/cpp"
 
 	"github.com/spf13/cobra"
 )
@@ -18,12 +19,11 @@ var cppCmd = &cobra.Command{
 	Short: "Add .vscode configuration file for C++ language",
 	Long: `Add .vscode configuration file for C++ language.
 It provides configuration files, such as:
-.vscode/xxx.json, 
+.vscode/xxx.json,
 .vscode/yyy.json`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("cpp called")
-		c := cpp.NewCpp()
-		c.Create()
+		cpp.CreateVscodeConfig()
 	},
 }
 
