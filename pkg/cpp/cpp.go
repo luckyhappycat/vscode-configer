@@ -1,5 +1,0 @@
-package cpp
-
-func CreateVscodeConfig() {
-	
-}
